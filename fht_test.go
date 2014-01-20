@@ -71,15 +71,8 @@ func BenchmarkFHTRadix2(b *testing.B) {
 }
 
 func Example_hartley() {
-	bits := uint(3)
-	blockSize := 1 << bits
-
-	samples := make([]float64, blockSize)
-	for i := 0; i < blockSize>>1; i++ {
-		samples[i] = 1.0
-	}
-
-	fht := NewFHT(bits)
+	samples := []float64{1, 1, 1, 1, 0, 0, 0, 0}
+	fht := NewFHT(3)
 
 	fmt.Printf("%+0.3f\n", samples)
 	fht.Execute(samples, false)
