@@ -71,15 +71,22 @@ func BenchmarkFHTRadix2(b *testing.B) {
 }
 
 func Example_hartley() {
-	samples := []float64{1, 1, 1, 1, 0, 0, 0, 0}
 	fht := NewFHT(3)
 
+	samples := []float64{1, 1, 1, 1, 0, 0, 0, 0}
 	fmt.Printf("%+0.3f\n", samples)
+
+	// Transform to Hartley space.
 	fht.Execute(samples, false)
+	fmt.Printf("%+0.3f\n", samples)
+
+	// Transform back to time-domain and normalize.
+	fht.Execute(samples, true)
 	fmt.Printf("%+0.3f\n", samples)
 	// Output:
 	// [+1.000 +1.000 +1.000 +1.000 +0.000 +0.000 +0.000 +0.000]
 	// [+4.000 +3.414 +0.000 +1.414 +0.000 +0.586 +0.000 -1.414]
+	// [+1.000 +1.000 +1.000 +1.000 +0.000 +0.000 +0.000 +0.000]
 }
 
 func stepResponse(n int) []float64 {
