@@ -4,23 +4,23 @@ import (
 	"math"
 )
 
-// State for Discrete Hartley Transform
+// Stores transform size and pre-computed factors.
 type FHT struct {
-	Log     uint
-	Factors []float64
+	log     uint
+	factors []float64
 }
 
 // Given log base 2 of the transform size, pre-computes all factors.
 func NewFHT(lg2 uint) (fht FHT) {
-	fht.Log = lg2
-	n := 1 << fht.Log
+	fht.log = lg2
+	n := 1 << fht.log
 	n2 := n >> 1
 
-	fht.Factors = make([]float64, n)
+	fht.factors = make([]float64, n)
 
 	phi := math.Pi / float64(n2)
 	for idx := 0; idx < n; idx += 2 {
-		fht.Factors[idx], fht.Factors[idx+1] = math.Sincos(phi * float64((idx>>1)+1))
+		fht.factors[idx], fht.factors[idx+1] = math.Sincos(phi * float64((idx>>1)+1))
 	}
 	return
 }
@@ -29,14 +29,14 @@ func NewFHT(lg2 uint) (fht FHT) {
 // transformed vector f by the transform size.
 func (fht FHT) Execute(f []float64, normalize bool) {
 	fht.revBinPermute(f)
-	n := 1 << fht.Log
+	n := 1 << fht.log
 
-	for ldm := uint(1); ldm <= fht.Log; ldm++ {
+	for ldm := uint(1); ldm <= fht.log; ldm++ {
 		m := 1 << ldm
 		m2 := m >> 1
 		m4 := m2 >> 1
 
-		stride := 1 << (fht.Log - ldm + 1)
+		stride := 1 << (fht.log - ldm + 1)
 
 		for r := 0; r < n; r += m {
 			sumDiff(&f[r], &f[r+m2])
@@ -47,7 +47,7 @@ func (fht FHT) Execute(f []float64, normalize bool) {
 
 			fIdx := stride - 2
 			for j, k := 1, m2-1; j < k; j, k = j+1, k-1 {
-				s, c := fht.Factors[fIdx], fht.Factors[fIdx+1]
+				s, c := fht.factors[fIdx], fht.factors[fIdx+1]
 
 				sumDiffMult(&f[r+j+m2], &f[r+k+m2], s, c)
 				sumDiff(&f[r+j], &f[r+j+m2])
@@ -66,9 +66,10 @@ func (fht FHT) Execute(f []float64, normalize bool) {
 	}
 }
 
+// Bit reversal permutation.
 func (fht FHT) revBinPermute(v []float64) {
 	var n, nh, r uint
-	n = 1 << fht.Log
+	n = 1 << fht.log
 	nh = n >> 1
 
 	for x := uint(1); x < nh; x++ {

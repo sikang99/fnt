@@ -70,21 +70,23 @@ func BenchmarkFHTRadix2(b *testing.B) {
 	}
 }
 
-func ExampleFHT() {
-	bits := uint(4)
+func Example_hartley() {
+	bits := uint(3)
 	blockSize := 1 << bits
 
 	samples := make([]float64, blockSize)
-	for i := range samples {
-		samples[i] = rand.Float64()
+	for i := 0; i < blockSize>>1; i++ {
+		samples[i] = 1.0
 	}
 
-	// NewFHT expects the log base 2 of the transform size.
 	fht := NewFHT(bits)
 
-	fmt.Printf("%0.3f\n", samples)
+	fmt.Printf("%+0.3f\n", samples)
 	fht.Execute(samples, false)
-	fmt.Printf("%0.3f\n", samples)
+	fmt.Printf("%+0.3f\n", samples)
+	// Output:
+	// [+1.000 +1.000 +1.000 +1.000 +0.000 +0.000 +0.000 +0.000]
+	// [+4.000 +3.414 +0.000 +1.414 +0.000 +0.586 +0.000 -1.414]
 }
 
 func stepResponse(n int) []float64 {
