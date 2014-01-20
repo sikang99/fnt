@@ -1,6 +1,7 @@
 package fnt
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"testing"
@@ -67,6 +68,23 @@ func BenchmarkFHTRadix2(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		fht.Execute(samples, false)
 	}
+}
+
+func ExampleFHT() {
+	bits := uint(4)
+	blockSize := 1 << bits
+
+	samples := make([]float64, blockSize)
+	for i := range samples {
+		samples[i] = rand.Float64()
+	}
+
+	// NewFHT expects the log base 2 of the transform size.
+	fht := NewFHT(bits)
+
+	fmt.Printf("%0.3f\n", samples)
+	fht.Execute(samples, false)
+	fmt.Printf("%0.3f\n", samples)
 }
 
 func stepResponse(n int) []float64 {
