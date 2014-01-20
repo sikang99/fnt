@@ -4,6 +4,14 @@ import (
 	"math"
 )
 
+// Constants for selecting algorithm type.
+type DivisionKind int
+
+const (
+	DIT DivisionKind = iota // Division-in-Time
+	DIF                     // Division-in-Frequency
+)
+
 // Stores transform size and pre-computed factors.
 type FHT struct {
 	log     uint
@@ -26,9 +34,24 @@ func NewFHT(lg2 uint) (fht FHT) {
 }
 
 // Transforms vector f to Hartley space. If normalize is true, will divide the
-// transformed vector f by the transform size.
-func (fht FHT) Execute(f []float64, normalize bool) {
-	fht.revBinPermute(f)
+// transformed vector f by the transform size. DIF transform is currently
+// unimplemented.
+func (fht FHT) Execute(f []float64, division DivisionKind, normalize bool) {
+	if len(f) != 1<<fht.log {
+		panic("invalid transform length")
+	}
+
+	switch division {
+	case DIT:
+		revBinPermute(f)
+		fht.hartleyDIT(f, normalize)
+	case DIF:
+		// Unimplemented
+		revBinPermute(f)
+	}
+}
+
+func (fht FHT) hartleyDIT(f []float64, normalize bool) {
 	n := 1 << fht.log
 
 	for ldm := uint(1); ldm <= fht.log; ldm++ {
@@ -67,9 +90,9 @@ func (fht FHT) Execute(f []float64, normalize bool) {
 }
 
 // Bit reversal permutation.
-func (fht FHT) revBinPermute(v []float64) {
+func revBinPermute(v []float64) {
 	var n, nh, r uint
-	n = 1 << fht.log
+	n = uint(len(v))
 	nh = n >> 1
 
 	for x := uint(1); x < nh; x++ {

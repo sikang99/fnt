@@ -8,6 +8,22 @@ import (
 	"time"
 )
 
+func TestLength(t *testing.T) {
+	bits := uint(4)
+	blockSize := 1 << bits
+
+	samples := randBlock(blockSize)
+
+	fht := NewFHT(bits)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("failed to fail: " + r.(string))
+		}
+	}()
+	fht.Execute(samples[1:], DIT, false)
+}
+
 func TestIdentity(t *testing.T) {
 	bits := uint(15)
 	blockSize := 1 << bits
@@ -17,8 +33,8 @@ func TestIdentity(t *testing.T) {
 	copy(output, input)
 
 	fht := NewFHT(bits)
-	fht.Execute(output, false)
-	fht.Execute(output, true)
+	fht.Execute(output, DIT, false)
+	fht.Execute(output, DIT, true)
 
 	for i := range output {
 		expected := input[i]
@@ -42,7 +58,7 @@ func TestConstant(t *testing.T) {
 	}
 
 	fht := NewFHT(bits)
-	fht.Execute(output, false)
+	fht.Execute(output, DIT, false)
 
 	if output[0] != float64(blockSize) {
 		t.Fatalf("%f %f\n", float64(blockSize), output[0])
@@ -66,7 +82,7 @@ func BenchmarkFHTRadix2(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		fht.Execute(samples, false)
+		fht.Execute(samples, DIT, false)
 	}
 }
 
@@ -77,11 +93,11 @@ func Example_hartley() {
 	fmt.Printf("%+0.3f\n", samples)
 
 	// Transform to Hartley space.
-	fht.Execute(samples, false)
+	fht.Execute(samples, DIT, false)
 	fmt.Printf("%+0.3f\n", samples)
 
 	// Transform back to time-domain and normalize.
-	fht.Execute(samples, true)
+	fht.Execute(samples, DIT, true)
 	fmt.Printf("%+0.3f\n", samples)
 	// Output:
 	// [+1.000 +1.000 +1.000 +1.000 +0.000 +0.000 +0.000 +0.000]
