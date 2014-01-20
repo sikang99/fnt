@@ -4,16 +4,13 @@ import (
 	"math"
 )
 
-const (
-	FFTForward  = -1.0
-	FFTBackward = 1.0
-)
-
+// State for Discrete Hartley Transform
 type FHT struct {
 	Log     uint
 	Factors []float64
 }
 
+// Given log base 2 of the transform size, pre-computes all factors.
 func NewFHT(lg2 uint) (fht FHT) {
 	fht.Log = lg2
 	n := 1 << fht.Log
@@ -28,6 +25,8 @@ func NewFHT(lg2 uint) (fht FHT) {
 	return
 }
 
+// Transforms vector f to Hartley space. If normalize is true, will divide the
+// transformed vector f by the transform size.
 func (fht FHT) Execute(f []float64, normalize bool) {
 	fht.revBinPermute(f)
 	n := 1 << fht.Log
@@ -40,19 +39,19 @@ func (fht FHT) Execute(f []float64, normalize bool) {
 		stride := 1 << (fht.Log - ldm + 1)
 
 		for r := 0; r < n; r += m {
-			SumDiff(&f[r], &f[r+m2])
+			sumDiff(&f[r], &f[r+m2])
 
 			if m4 != 0 {
-				SumDiff(&f[r+m4], &f[r+m2+m4])
+				sumDiff(&f[r+m4], &f[r+m2+m4])
 			}
 
 			fIdx := stride - 2
 			for j, k := 1, m2-1; j < k; j, k = j+1, k-1 {
 				s, c := fht.Factors[fIdx], fht.Factors[fIdx+1]
 
-				SumDiffMult(&f[r+j+m2], &f[r+k+m2], s, c)
-				SumDiff(&f[r+j], &f[r+j+m2])
-				SumDiff(&f[r+k], &f[r+k+m2])
+				sumDiffMult(&f[r+j+m2], &f[r+k+m2], s, c)
+				sumDiff(&f[r+j], &f[r+j+m2])
+				sumDiff(&f[r+k], &f[r+k+m2])
 
 				fIdx += stride
 			}
@@ -89,18 +88,10 @@ func (fht FHT) revBinPermute(v []float64) {
 	}
 }
 
-func RevBinUpdate(r, n uint) uint {
-	for r&n == 0 && n > 0 {
-		n >>= 1
-		r ^= n
-	}
-	return r
-}
-
-func SumDiff(a, b *float64) {
+func sumDiff(a, b *float64) {
 	*a, *b = *a+*b, *a-*b
 }
 
-func SumDiffMult(a, b *float64, s, c float64) {
+func sumDiffMult(a, b *float64, s, c float64) {
 	*a, *b = *a*c+*b*s, *a*s-*b*c
 }
