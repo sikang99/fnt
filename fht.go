@@ -24,10 +24,10 @@ func NewFHT(lg2 uint) (fht FHT) {
 	n := 1 << fht.log
 	n2 := n >> 1
 
-	fht.factors = make([]float64, n)
+	fht.factors = make([]float64, n2)
 
 	phi := math.Pi / float64(n2)
-	for idx := 0; idx < n; idx += 2 {
+	for idx := 0; idx < n2; idx += 2 {
 		fht.factors[idx], fht.factors[idx+1] = math.Sincos(phi * float64((idx>>1)+1))
 	}
 	return
