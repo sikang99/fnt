@@ -1,6 +1,7 @@
 package fnt
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -14,15 +15,22 @@ const (
 
 // Stores transform size and pre-computed factors.
 type FHT struct {
+	n       int
 	log     uint
 	factors []float64
 }
 
 // Given log base 2 of the transform size, pre-computes all factors.
-func NewFHT(lg2 uint) (fht FHT) {
-	fht.log = lg2
-	n := 1 << fht.log
-	n2 := n >> 1
+func NewFHT(n int) (fht FHT) {
+	fht.n = n
+	if fht.n&(fht.n-1) != 0 {
+		panic(fmt.Sprintf("length must be power of 2: %d", fht.n))
+	}
+
+	for ; n > 1; fht.log, n = fht.log+1, n>>1 {
+	}
+
+	n2 := fht.n >> 1
 
 	fht.factors = make([]float64, n2)
 
@@ -37,7 +45,7 @@ func NewFHT(lg2 uint) (fht FHT) {
 // transformed vector f by the transform size. DIF transform is currently
 // unimplemented.
 func (fht FHT) Execute(f []float64, division DivisionKind, normalize bool) {
-	if len(f) != 1<<fht.log {
+	if len(f) != fht.n {
 		panic("invalid transform length")
 	}
 

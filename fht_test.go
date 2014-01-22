@@ -14,7 +14,7 @@ func TestLength(t *testing.T) {
 
 	samples := randBlock(blockSize)
 
-	fht := NewFHT(bits)
+	fht := NewFHT(blockSize)
 
 	defer func() {
 		if r := recover(); r == nil {
@@ -32,7 +32,7 @@ func TestIdentity(t *testing.T) {
 	output := make([]float64, blockSize)
 	copy(output, input)
 
-	fht := NewFHT(bits)
+	fht := NewFHT(blockSize)
 	fht.Execute(output, DIT, false)
 	fht.Execute(output, DIT, true)
 
@@ -57,7 +57,7 @@ func TestConstant(t *testing.T) {
 		output[i] = 1.0
 	}
 
-	fht := NewFHT(bits)
+	fht := NewFHT(blockSize)
 	fht.Execute(output, DIT, false)
 
 	if output[0] != float64(blockSize) {
@@ -73,14 +73,15 @@ func TestConstant(t *testing.T) {
 
 func TestDirect(t *testing.T) {
 	bits := uint(7)
-	n := 1 << bits
-	f0 := randBlock(n)
-	f1 := make([]float64, n)
+	blockSize := 1 << bits
+
+	f0 := randBlock(blockSize)
+	f1 := make([]float64, blockSize)
 	copy(f1, f0)
 
 	directHartleyTransform(f0)
 
-	fht := NewFHT(bits)
+	fht := NewFHT(blockSize)
 	fht.Execute(f1, DIT, false)
 
 	for i := range f0 {
@@ -108,7 +109,7 @@ func BenchmarkFHTRadix2(b *testing.B) {
 	bits := uint(14)
 	blockSize := 1 << bits
 
-	fht := NewFHT(bits)
+	fht := NewFHT(blockSize)
 	samples := randBlock(blockSize)
 
 	b.SetBytes(int64(blockSize))
@@ -120,7 +121,7 @@ func BenchmarkFHTRadix2(b *testing.B) {
 }
 
 func Example_hartley() {
-	fht := NewFHT(3)
+	fht := NewFHT(8)
 
 	samples := []float64{1, 1, 1, 1, 0, 0, 0, 0}
 	fmt.Printf("%+0.3f\n", samples)
