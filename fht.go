@@ -20,7 +20,7 @@ type FHT struct {
 	factors []float64
 }
 
-// Given log base 2 of the transform size, pre-computes all factors.
+// Given transform size, pre-computes all factors.
 func NewFHT(n int) (fht FHT) {
 	// Check transform length is power of 2
 	fht.n = n
