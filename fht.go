@@ -20,7 +20,8 @@ type FHT struct {
 	factors []float64
 }
 
-// Given transform size, pre-computes all factors.
+// Given transform size, pre-computes all factors. Panics when length n is not
+// a power of 2.
 func NewFHT(n int) (fht FHT) {
 	// Check transform length is power of 2
 	fht.n = n
@@ -46,7 +47,7 @@ func NewFHT(n int) (fht FHT) {
 
 // Transforms vector f to Hartley space. The div parameter determines division
 // kind. If norm is true, will divide the transformed vector f by the
-// transform size.
+// transform size. Panics when array length differs from expected.
 func (fht FHT) Execute(f []float64, div DivisionKind, norm bool) {
 	// Check given vector is expected length
 	if len(f) != fht.n {
