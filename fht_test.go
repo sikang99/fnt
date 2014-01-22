@@ -71,6 +71,39 @@ func TestConstant(t *testing.T) {
 	}
 }
 
+func TestDirect(t *testing.T) {
+	bits := uint(7)
+	n := 1 << bits
+	f0 := randBlock(n)
+	f1 := make([]float64, n)
+	copy(f1, f0)
+
+	directHartleyTransform(f0)
+
+	fht := NewFHT(bits)
+	fht.Execute(f1, DIT, false)
+
+	for i := range f0 {
+		if math.Abs(f0[i]-f1[i]) > 1e-12 {
+			t.Fatalf("%f %f\n", f0[i], f1[i])
+		}
+	}
+}
+
+func directHartleyTransform(f []float64) {
+	n := len(f)
+	workspace := make([]float64, n)
+
+	phi := 2.0 * math.Pi / float64(n)
+	for w := 0; w < n; w++ {
+		for k := range f {
+			s, c := math.Sincos(phi * float64(k) * float64(w))
+			workspace[w] += (c + s) * f[k]
+		}
+	}
+	copy(f, workspace)
+}
+
 func BenchmarkFHTRadix2(b *testing.B) {
 	bits := uint(14)
 	blockSize := 1 << bits
