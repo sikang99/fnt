@@ -56,9 +56,9 @@ func (fht FHT) Execute(f []float64, div DivisionKind, norm bool) {
 	switch div {
 	case DIT:
 		revBinPermute(f)
-		fht.DIT(f)
+		fht.dit(f)
 	case DIF:
-		fht.DIF(f)
+		fht.dif(f)
 		revBinPermute(f)
 	}
 
@@ -67,7 +67,7 @@ func (fht FHT) Execute(f []float64, div DivisionKind, norm bool) {
 	}
 }
 
-func (fht FHT) DIT(f []float64) {
+func (fht FHT) dit(f []float64) {
 	n := 1 << fht.log
 
 	for ldm := uint(1); ldm <= fht.log; ldm++ {
@@ -98,7 +98,7 @@ func (fht FHT) DIT(f []float64) {
 	}
 }
 
-func (fht FHT) DIF(f []float64) {
+func (fht FHT) dif(f []float64) {
 	n := 1 << fht.log
 
 	for ldm := fht.log; ldm >= 1; ldm-- {
