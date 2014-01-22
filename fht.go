@@ -44,7 +44,7 @@ func NewFHT(n int) (fht FHT) {
 	return
 }
 
-// Transforms vector f to Hartley space. The div parameter determins division
+// Transforms vector f to Hartley space. The div parameter determines division
 // kind. If norm is true, will divide the transformed vector f by the
 // transform size.
 func (fht FHT) Execute(f []float64, div DivisionKind, norm bool) {
