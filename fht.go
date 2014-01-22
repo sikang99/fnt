@@ -85,13 +85,12 @@ func (fht FHT) dit(f []float64) {
 			}
 
 			fIdx := stride - 2
-			for j, k := 1, m2-1; j < k; j, k = j+1, k-1 {
+			for j := 1; j < m4; j++ {
 				s, c := fht.factors[fIdx], fht.factors[fIdx+1]
 
-				sumDiffMult(&f[r+j+m2], &f[r+k+m2], s, c)
+				sumDiffMult(&f[r+j+m2], &f[r+m2-j+m2], s, c)
 				sumDiff(&f[r+j], &f[r+j+m2])
-				sumDiff(&f[r+k], &f[r+k+m2])
-
+				sumDiff(&f[r+m2-j], &f[r+m2-j+m2])
 				fIdx += stride
 			}
 		}
@@ -113,13 +112,9 @@ func (fht FHT) dif(f []float64) {
 				sumDiff(&f[r+j], &f[r+j+m2])
 			}
 
-			fIdx := stride - 2
-			p := f[r+m2:]
-			for j, k := 1, m2-1; j < m4; j, k = j+1, k-1 {
-				sumDiffMult(&p[j], &p[k], fht.factors[fIdx], fht.factors[fIdx+1])
-				fIdx += stride
+			for j, fIdx := 1, stride-2; j < m4; j, fIdx = j+1, fIdx+stride {
+				sumDiffMult(&f[r+m2+j], &f[r+m-j], fht.factors[fIdx], fht.factors[fIdx+1])
 			}
-
 		}
 	}
 }
