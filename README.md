@@ -5,5 +5,5 @@ Fast Numeric Transforms for Go. Currently only provides 1-dimensional discrete H
 
 ## To Do
  * Minor fixes to Fourier transform to make ready for commit.
- * Remove redundant factor computation due to symmetries.
- * Explore more localized algorithm for Hartley transform.
+ * Remove redundant factor computation in FHT due to symmetries.
+ * Explore a more localized algorithm for Hartley transform.

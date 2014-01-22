@@ -22,44 +22,52 @@ type FHT struct {
 
 // Given log base 2 of the transform size, pre-computes all factors.
 func NewFHT(n int) (fht FHT) {
+	// Check transform length is power of 2
 	fht.n = n
 	if fht.n&(fht.n-1) != 0 {
 		panic(fmt.Sprintf("length must be power of 2: %d", fht.n))
 	}
 
+	// Calculate log base 2 of transform size
 	for ; n > 1; fht.log, n = fht.log+1, n>>1 {
 	}
 
+	// Allocate factor array
 	n2 := fht.n >> 1
-
 	fht.factors = make([]float64, n2)
 
+	// Pre-compute factors
 	phi := math.Pi / float64(n2)
-	for idx := 0; idx < n2; idx += 2 {
-		fht.factors[idx], fht.factors[idx+1] = math.Sincos(phi * float64((idx>>1)+1))
+	for idx, i := 0, 1.0; idx < n2; idx, i = idx+2, i+1 {
+		fht.factors[idx], fht.factors[idx+1] = math.Sincos(phi * i)
 	}
 	return
 }
 
-// Transforms vector f to Hartley space. If normalize is true, will divide the
-// transformed vector f by the transform size. DIF transform is currently
-// unimplemented.
-func (fht FHT) Execute(f []float64, division DivisionKind, normalize bool) {
+// Transforms vector f to Hartley space. The div parameter determins division
+// kind. If norm is true, will divide the transformed vector f by the
+// transform size.
+func (fht FHT) Execute(f []float64, div DivisionKind, norm bool) {
+	// Check given vector is expected length
 	if len(f) != fht.n {
 		panic("invalid transform length")
 	}
 
-	switch division {
+	switch div {
 	case DIT:
 		revBinPermute(f)
-		fht.hartleyDIT(f, normalize)
+		fht.DIT(f)
 	case DIF:
-		// Unimplemented
+		fht.DIF(f)
 		revBinPermute(f)
+	}
+
+	if norm {
+		normalize(f)
 	}
 }
 
-func (fht FHT) hartleyDIT(f []float64, normalize bool) {
+func (fht FHT) DIT(f []float64) {
 	n := 1 << fht.log
 
 	for ldm := uint(1); ldm <= fht.log; ldm++ {
@@ -86,13 +94,32 @@ func (fht FHT) hartleyDIT(f []float64, normalize bool) {
 
 				fIdx += stride
 			}
-
 		}
 	}
+}
 
-	if normalize {
-		for i := range f {
-			f[i] = f[i] / float64(n)
+func (fht FHT) DIF(f []float64) {
+	n := 1 << fht.log
+
+	for ldm := fht.log; ldm >= 1; ldm-- {
+		m := 1 << ldm
+		m2 := m >> 1
+		m4 := m2 >> 1
+
+		stride := 1 << (fht.log - ldm + 1)
+
+		for r := 0; r < n; r += m {
+			for j := 0; j < m2; j++ {
+				sumDiff(&f[r+j], &f[r+j+m2])
+			}
+
+			fIdx := stride - 2
+			p := f[r+m2:]
+			for j, k := 1, m2-1; j < m4; j, k = j+1, k-1 {
+				sumDiffMult(&p[j], &p[k], fht.factors[fIdx], fht.factors[fIdx+1])
+				fIdx += stride
+			}
+
 		}
 	}
 }
@@ -126,4 +153,11 @@ func sumDiff(a, b *float64) {
 
 func sumDiffMult(a, b *float64, s, c float64) {
 	*a, *b = *a*c+*b*s, *a*s-*b*c
+}
+
+func normalize(f []float64) {
+	n := len(f)
+	for i := range f {
+		f[i] = f[i] / float64(n)
+	}
 }
