@@ -56,15 +56,15 @@ func (fht FHT) Execute(f []float64, div DivisionKind, norm bool) {
 
 	switch div {
 	case DIT:
-		revBinPermute(f)
+		fht.revBinPermute(f)
 		fht.dit(f)
 	case DIF:
 		fht.dif(f)
-		revBinPermute(f)
+		fht.revBinPermute(f)
 	}
 
 	if norm {
-		normalize(f)
+		fht.normalize(f)
 	}
 }
 
@@ -79,19 +79,19 @@ func (fht FHT) dit(f []float64) {
 		stride := 1 << (fht.log - ldm + 1)
 
 		for r := 0; r < n; r += m {
-			sumDiff(&f[r], &f[r+m2])
+			fht.sumDiff(&f[r], &f[r+m2])
 
 			if m4 != 0 {
-				sumDiff(&f[r+m4], &f[r+m2+m4])
+				fht.sumDiff(&f[r+m4], &f[r+m2+m4])
 			}
 
 			fIdx := stride - 2
 			for j := 1; j < m4; j++ {
 				s, c := fht.factors[fIdx], fht.factors[fIdx+1]
 
-				sumDiffMult(&f[r+j+m2], &f[r+m2-j+m2], s, c)
-				sumDiff(&f[r+j], &f[r+j+m2])
-				sumDiff(&f[r+m2-j], &f[r+m2-j+m2])
+				fht.sumDiffMult(&f[r+j+m2], &f[r+m2-j+m2], s, c)
+				fht.sumDiff(&f[r+j], &f[r+j+m2])
+				fht.sumDiff(&f[r+m2-j], &f[r+m2-j+m2])
 				fIdx += stride
 			}
 		}
@@ -110,18 +110,18 @@ func (fht FHT) dif(f []float64) {
 
 		for r := 0; r < n; r += m {
 			for j := 0; j < m2; j++ {
-				sumDiff(&f[r+j], &f[r+j+m2])
+				fht.sumDiff(&f[r+j], &f[r+j+m2])
 			}
 
 			for j, fIdx := 1, stride-2; j < m4; j, fIdx = j+1, fIdx+stride {
-				sumDiffMult(&f[r+m2+j], &f[r+m-j], fht.factors[fIdx], fht.factors[fIdx+1])
+				fht.sumDiffMult(&f[r+m2+j], &f[r+m-j], fht.factors[fIdx], fht.factors[fIdx+1])
 			}
 		}
 	}
 }
 
 // Bit reversal permutation.
-func revBinPermute(v []float64) {
+func (fht *FHT) revBinPermute(v []float64) {
 	var n, nh, r uint
 	n = uint(len(v))
 	nh = n >> 1
@@ -143,15 +143,15 @@ func revBinPermute(v []float64) {
 	}
 }
 
-func sumDiff(a, b *float64) {
+func (fht *FHT) sumDiff(a, b *float64) {
 	*a, *b = *a+*b, *a-*b
 }
 
-func sumDiffMult(a, b *float64, s, c float64) {
+func (fht *FHT) sumDiffMult(a, b *float64, s, c float64) {
 	*a, *b = *a*c+*b*s, *a*s-*b*c
 }
 
-func normalize(f []float64) {
+func (fht *FHT) normalize(f []float64) {
 	n := len(f)
 	for i := range f {
 		f[i] = f[i] / float64(n)
