@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+	Tolerance = 1e-12
+)
+
 var div = []DivisionKind{DIT, DIF}
 
 func TestLength(t *testing.T) {
@@ -44,7 +48,7 @@ func TestIdentity(t *testing.T) {
 			expected := input[i]
 			received := output[i]
 			diff := math.Abs(expected - received)
-			if diff >= 1e-12 {
+			if diff >= Tolerance {
 				t.Fatalf("%f %f %f\n", diff, expected, received)
 			}
 		}
@@ -94,7 +98,7 @@ func TestDirect(t *testing.T) {
 		fht.Execute(f1, div[d], false)
 
 		for i := range f0 {
-			if math.Abs(f0[i]-f1[i]) > 1e-12 {
+			if math.Abs(f0[i]-f1[i]) > Tolerance {
 				t.Fatalf("%f %f\n", f0[i], f1[i])
 			}
 		}
