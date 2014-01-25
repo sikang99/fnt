@@ -3,22 +3,14 @@ package fnt
 import (
 	"fmt"
 	"math"
-	"math/rand"
 	"testing"
-	"time"
 )
 
-const (
-	Tolerance = 1e-12
-)
-
-var div = []DivisionKind{DIT, DIF}
-
-func TestLength(t *testing.T) {
+func TestFHTLength(t *testing.T) {
 	bits := uint(4)
 	blockSize := 1 << bits
 
-	samples := randBlock(blockSize)
+	samples := randBlockF64(blockSize)
 
 	fht := NewFHT(blockSize)
 
@@ -31,18 +23,18 @@ func TestLength(t *testing.T) {
 	fht.Execute(samples[1:], DIF, false)
 }
 
-func TestIdentity(t *testing.T) {
+func TestFHTIdentity(t *testing.T) {
 	bits := uint(15)
 	blockSize := 1 << bits
 
-	for d := range div {
-		input := randBlock(blockSize)
+	for _, d := range div {
+		input := randBlockF64(blockSize)
 		output := make([]float64, blockSize)
 		copy(output, input)
 
 		fht := NewFHT(blockSize)
-		fht.Execute(output, div[d], false)
-		fht.Execute(output, div[d], true)
+		fht.Execute(output, d, false)
+		fht.Execute(output, d, true)
 
 		for i := range output {
 			expected := input[i]
@@ -55,13 +47,13 @@ func TestIdentity(t *testing.T) {
 	}
 }
 
-func TestConstant(t *testing.T) {
+func TestFHTConstant(t *testing.T) {
 	bits := uint(4)
 	blockSize := 1 << bits
 
 	fht := NewFHT(blockSize)
 
-	for d := range div {
+	for _, d := range div {
 		input := make([]float64, blockSize)
 		output := make([]float64, blockSize)
 		for i := range input {
@@ -69,7 +61,7 @@ func TestConstant(t *testing.T) {
 			output[i] = 1.0
 		}
 
-		fht.Execute(output, div[d], false)
+		fht.Execute(output, d, false)
 
 		if output[0] != float64(blockSize) {
 			t.Fatalf("%f %f\n", float64(blockSize), output[0])
@@ -83,19 +75,19 @@ func TestConstant(t *testing.T) {
 	}
 }
 
-func TestDirect(t *testing.T) {
+func TestFHTDirect(t *testing.T) {
 	bits := uint(7)
 	blockSize := 1 << bits
 
-	for d := range div {
-		f0 := randBlock(blockSize)
+	for _, d := range div {
+		f0 := randBlockF64(blockSize)
 		f1 := make([]float64, blockSize)
 		copy(f1, f0)
 
 		directHartleyTransform(f0)
 
 		fht := NewFHT(blockSize)
-		fht.Execute(f1, div[d], false)
+		fht.Execute(f1, d, false)
 
 		for i := range f0 {
 			if math.Abs(f0[i]-f1[i]) > Tolerance {
@@ -124,7 +116,7 @@ func BenchmarkFHTRadix2DIT(b *testing.B) {
 	blockSize := 1 << bits
 
 	fht := NewFHT(blockSize)
-	samples := randBlock(blockSize)
+	samples := randBlockF64(blockSize)
 
 	b.SetBytes(int64(blockSize))
 	b.ReportAllocs()
@@ -139,7 +131,7 @@ func BenchmarkFHTRadix2DIF(b *testing.B) {
 	blockSize := 1 << bits
 
 	fht := NewFHT(blockSize)
-	samples := randBlock(blockSize)
+	samples := randBlockF64(blockSize)
 
 	b.SetBytes(int64(blockSize))
 	b.ReportAllocs()
@@ -152,10 +144,10 @@ func BenchmarkFHTRadix2DIF(b *testing.B) {
 func Example_hartley() {
 	fht := NewFHT(8)
 
-	samples := []float64{1, 1, 1, 1, 0, 0, 0, 0}
+	samples := stepResponseF64(8)
 	fmt.Printf("%+0.3f\n", samples)
 
-	// Transform to Hartley space.
+	// Transform to Hartley domain.
 	fht.Execute(samples, DIT, false)
 	fmt.Printf("%+0.3f\n", samples)
 
@@ -166,24 +158,4 @@ func Example_hartley() {
 	// [+1.000 +1.000 +1.000 +1.000 +0.000 +0.000 +0.000 +0.000]
 	// [+4.000 +3.414 +0.000 +1.414 +0.000 +0.586 +0.000 -1.414]
 	// [+1.000 +1.000 +1.000 +1.000 +0.000 +0.000 +0.000 +0.000]
-}
-
-func randBlock(n int) []float64 {
-	samples := make([]float64, n)
-	for i := range samples {
-		samples[i] = rand.Float64()
-	}
-	return samples
-}
-
-func stepResponse(n int) []float64 {
-	samples := make([]float64, n)
-	for i := 0; i < n>>1; i++ {
-		samples[i] = 1.0
-	}
-	return samples
-}
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
 }
