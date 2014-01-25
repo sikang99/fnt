@@ -144,7 +144,7 @@ func BenchmarkFHTRadix2DIF(b *testing.B) {
 func Example_hartley() {
 	fht := NewFHT(8)
 
-	samples := stepResponseF64(8)
+	samples := []float64{1, 1, 1, 1, 0, 0, 0, 0}
 	fmt.Printf("%+0.3f\n", samples)
 
 	// Transform to Hartley domain.
