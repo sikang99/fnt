@@ -35,7 +35,7 @@ Output:
 ```
 
 ## To Do
- * Explore more localized algorithm for both FHT and FFT.
+ * Explore more localized algorithm for both FFT and FHT.
  * Explore parallelization for all transforms.
  * Implement convolution methods for both FFT and FHT.
  * Implement Real-to-Complex and Complex-to-Real FFT's.
