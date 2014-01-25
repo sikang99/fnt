@@ -3,7 +3,7 @@ Fast Numeric Transforms for Go. Provides 1-dimensional discrete Hartley and Four
 
 ## Example
 
-```go
+```Go
 package main
 
 import (
@@ -25,6 +25,13 @@ func main() {
 	fft.Execute(samples, fnt.DIT, fnt.Backward, true)
 	fmt.Printf("%+0.3f\n", samples)
 }
+```
+
+Output:
+```
+[(+1.000+0.000i) (+1.000+0.000i) (+1.000+0.000i) (+1.000+0.000i) (+0.000+0.000i) (+0.000+0.000i) (+0.000+0.000i) (+0.000+0.000i)]
+[(+4.000+0.000i) (+1.000-2.414i) (+0.000+0.000i) (+1.000-0.414i) (+0.000+0.000i) (+1.000+0.414i) (+0.000+0.000i) (+1.000+2.414i)]
+[(+1.000+0.000i) (+1.000+0.000i) (+1.000-0.000i) (+1.000-0.000i) (+0.000+0.000i) (+0.000-0.000i) (+0.000+0.000i) (+0.000+0.000i)]
 ```
 
 ## To Do
