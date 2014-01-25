@@ -5,14 +5,6 @@ import (
 	"math"
 )
 
-// Constants for selecting algorithm type.
-type DivisionKind int
-
-const (
-	DIT DivisionKind = iota // Division-in-Time
-	DIF                     // Division-in-Frequency
-)
-
 // Stores transform size and pre-computed factors.
 type FHT struct {
 	n       int
@@ -30,8 +22,7 @@ func NewFHT(n int) (fht FHT) {
 	}
 
 	// Calculate log base 2 of transform size
-	for ; n > 1; fht.log, n = fht.log+1, n>>1 {
-	}
+	fht.log = log2(uint(fht.n))
 
 	// Allocate factor array
 	n2 := fht.n >> 1
