@@ -72,7 +72,11 @@ func (fft FFT) Execute(f []complex128, div DivisionKind, dir Direction, norm boo
 }
 
 func (fft FFT) dit(f, factors []complex128) {
-	for ldm := uint(1); ldm <= fft.log; ldm++ {
+	for r := 0; r < fft.n; r += 2 {
+		fft.sumDiff(&f[r], &f[r+1])
+	}
+
+	for ldm := uint(2); ldm <= fft.log; ldm++ {
 		m := 1 << ldm
 		mh := m >> 1
 		stride := 1 << (fft.log - ldm)
@@ -85,7 +89,7 @@ func (fft FFT) dit(f, factors []complex128) {
 }
 
 func (fft FFT) dif(f, factors []complex128) {
-	for ldm := fft.log; ldm >= 1; ldm-- {
+	for ldm := fft.log; ldm >= 2; ldm-- {
 		m := 1 << ldm
 		mh := m >> 1
 		stride := 1 << (fft.log - ldm)
@@ -94,6 +98,11 @@ func (fft FFT) dif(f, factors []complex128) {
 				fft.sumDiffMultDIF(&f[r+j], &f[r+j+mh], factors[k])
 			}
 		}
+
+	}
+
+	for r := 0; r < fft.n; r += 2 {
+		fft.sumDiff(&f[r], &f[r+1])
 	}
 }
 
@@ -122,6 +131,10 @@ func (fft *FFT) revBinPermute(v []complex128) {
 
 // Despite not modifying any state, passing a pointer avoids some overhead,
 // which is substantial for these methods.
+func (fft *FFT) sumDiff(a, b *complex128) {
+	*a, *b = *a+*b, *a-*b
+}
+
 func (fft *FFT) sumDiffMultDIT(a, b *complex128, c complex128) {
 	*a, *b = *a+*b*c, *a-*b*c
 }
