@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/bemasher/FNT"
+	"github.com/bemasher/fnt"
 )
 
 func main() {
