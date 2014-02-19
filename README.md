@@ -34,6 +34,10 @@ Output:
 [(+1.000+0.000i) (+1.000+0.000i) (+1.000-0.000i) (+1.000-0.000i) (+0.000+0.000i) (+0.000-0.000i) (+0.000+0.000i) (+0.000+0.000i)]
 ```
 
+## Documentation
+
+Documentation can be found at: [![GoDoc](https://godoc.org/github.com/bemasher/fnt?status.png)](https://godoc.org/github.com/bemasher/fnt)
+
 ## To Do
  * Explore more localized algorithm for both FFT and FHT.
  * Explore parallelization for all transforms.
